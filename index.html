@@ -13,21 +13,21 @@
         }
 
         :root {
-            --primary: #001327;
-            --secondary: #001327;
-            --accent: #35b56a;
-            --danger: #e0705f;
-            --success: #1f8a3f;
-            --text: #f4f3ef;
-            --text-muted: #adc4e0;
-            --border: #001327;
+            --primary: #ffffff;
+            --secondary: #ffffff;
+            --accent: #1f4e8c;
+            --danger: #c0392b;
+            --success: #1f4e8c;
+            --text: #14263f;
+            --text-muted: #5a6b86;
+            --border: #ffffff;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
                          'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
                          sans-serif;
-            background: linear-gradient(135deg, var(--primary) 0%, #001327 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, #ffffff 100%);
             color: var(--text);
             min-height: 100vh;
             padding: 20px;
@@ -46,7 +46,7 @@
         h1 {
             font-size: 3em;
             margin-bottom: 10px;
-            background: linear-gradient(135deg, var(--accent), #35b56a);
+            background: linear-gradient(135deg, var(--accent), #1f4e8c);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -150,7 +150,7 @@
         select:focus {
             outline: none;
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(53, 181, 106, 0.1);
+            box-shadow: 0 0 0 3px rgba(31, 78, 140, 0.1);
         }
 
         input[type="range"] {
@@ -207,7 +207,7 @@
 
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(53, 181, 106, 0.2);
+            box-shadow: 0 8px 16px rgba(31, 78, 140, 0.2);
         }
 
         button:active {
@@ -364,7 +364,7 @@
 
         .status-message {
             padding: 12px;
-            background: rgba(53, 181, 106, 0.1);
+            background: rgba(31, 78, 140, 0.1);
             border-left: 3px solid var(--accent);
             color: var(--text);
             margin-top: 15px;
@@ -373,9 +373,9 @@
         }
 
         .status-message.error {
-            background: rgba(224, 112, 95, 0.1);
+            background: rgba(192, 57, 43, 0.1);
             border-left-color: var(--danger);
-            color: #e0705f;
+            color: #c0392b;
         }
 
         .info-grid {
@@ -1041,8 +1041,8 @@
                     datasets: [{
                         label: 'Frequency',
                         data: bins,
-                        backgroundColor: 'rgba(53, 181, 106, 0.7)',
-                        borderColor: 'rgba(53, 181, 106, 1)',
+                        backgroundColor: 'rgba(31, 78, 140, 0.7)',
+                        borderColor: 'rgba(31, 78, 140, 1)',
                         borderWidth: 1
                     }]
                 },
@@ -1050,11 +1050,11 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { labels: { color: '#adc4e0' } }
+                        legend: { labels: { color: '#5a6b86' } }
                     },
                     scales: {
-                        y: { ticks: { color: '#adc4e0' }, grid: { color: '#001327' } },
-                        x: { ticks: { color: '#adc4e0' }, grid: { color: '#001327' } }
+                        y: { ticks: { color: '#5a6b86' }, grid: { color: '#ffffff' } },
+                        x: { ticks: { color: '#5a6b86' }, grid: { color: '#ffffff' } }
                     }
                 }
             });
@@ -1071,8 +1071,8 @@
                     datasets: [{
                         label: title,
                         data: data,
-                        borderColor: 'rgba(53, 181, 106, 1)',
-                        backgroundColor: 'rgba(53, 181, 106, 0.1)',
+                        borderColor: 'rgba(31, 78, 140, 1)',
+                        backgroundColor: 'rgba(31, 78, 140, 0.1)',
                         tension: 0.1,
                         fill: true
                     }]
@@ -1081,11 +1081,11 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { labels: { color: '#adc4e0' } }
+                        legend: { labels: { color: '#5a6b86' } }
                     },
                     scales: {
-                        y: { ticks: { color: '#adc4e0' }, grid: { color: '#001327' } },
-                        x: { ticks: { color: '#adc4e0' }, grid: { color: '#001327' } }
+                        y: { ticks: { color: '#5a6b86' }, grid: { color: '#ffffff' } },
+                        x: { ticks: { color: '#5a6b86' }, grid: { color: '#ffffff' } }
                     }
                 }
             });
@@ -1197,7 +1197,7 @@
             let pointsInSquare = 0;
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.strokeStyle = 'rgba(53, 181, 106, 0.3)';
+            ctx.strokeStyle = 'rgba(31, 78, 140, 0.3)';
             ctx.lineWidth = 2;
             ctx.strokeRect(centerX - radius, centerY - radius, radius * 2, radius * 2);
             ctx.beginPath();
@@ -1222,7 +1222,7 @@
                     const pixelX = centerX + x * radius;
                     const pixelY = centerY + y * radius;
 
-                    ctx.fillStyle = inCircle ? 'rgba(53, 181, 106, 0.8)' : 'rgba(224, 112, 95, 0.5)';
+                    ctx.fillStyle = inCircle ? 'rgba(31, 78, 140, 0.8)' : 'rgba(192, 57, 43, 0.5)';
                     ctx.fillRect(pixelX - 1, pixelY - 1, 2, 2);
                 }
 
@@ -1303,8 +1303,8 @@
                             maintainAspectRatio: false,
                             plugins: { legend: { display: false } },
                             scales: {
-                                y: { ticks: { color: '#adc4e0' }, grid: { color: '#001327' } },
-                                x: { ticks: { color: '#adc4e0' }, grid: { color: '#001327' } }
+                                y: { ticks: { color: '#5a6b86' }, grid: { color: '#ffffff' } },
+                                x: { ticks: { color: '#5a6b86' }, grid: { color: '#ffffff' } }
                             }
                         }
                     });
@@ -1473,6 +1473,6 @@
             document.getElementById('varProgressText').textContent = 'Ready';
         });
     </script>
-<a id="view-src" href="https://github.com/Freddricklogan/monte-carlo-simulator" target="_blank" rel="noopener" title="View source on GitHub" style="position:fixed;right:14px;bottom:14px;z-index:99999;font:600 12px/1 -apple-system,system-ui,sans-serif;color:#001327;background:#4ce084;border-radius:999px;padding:10px 15px;text-decoration:none;box-shadow:0 3px 16px rgba(0, 19, 39,.45)">&#9654; View Source</a>
+<a id="view-src" href="https://github.com/Freddricklogan/monte-carlo-simulator" target="_blank" rel="noopener" title="View source on GitHub" style="position:fixed;right:14px;bottom:14px;z-index:99999;font:600 12px/1 -apple-system,system-ui,sans-serif;color:#ffffff;background:#1f4e8c;border-radius:999px;padding:10px 15px;text-decoration:none;box-shadow:0 3px 16px rgba(255, 255, 255,.45)">&#9654; View Source</a>
 </body>
 </html>

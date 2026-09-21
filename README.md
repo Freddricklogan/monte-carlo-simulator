@@ -1,90 +1,175 @@
-<h1 align="center">Monte Carlo Simulation Engine</h1>
+# Monte Carlo Simulation Engine: four stochastic problems with the closed-form answer printed beside every estimate
 
-<p align="center">
-  <em>An interactive, browser-based quant lab — price options, estimate risk, and watch stochastic processes unfold in real time.</em>
-</p>
+[![CI/CD](https://github.com/Freddricklogan/monte-carlo-simulator/actions/workflows/deploy.yml/badge.svg)](https://github.com/Freddricklogan/monte-carlo-simulator/actions/workflows/deploy.yml)
+[![Coverage](https://img.shields.io/badge/coverage-99%25-brightgreen)](#5-getting-started--verification)
+[![Security (CodeQL)](https://github.com/Freddricklogan/monte-carlo-simulator/actions/workflows/codeql.yml/badge.svg)](https://github.com/Freddricklogan/monte-carlo-simulator/actions/workflows/codeql.yml)
+[![License MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Live Demo](https://img.shields.io/badge/live%20demo-online-brightgreen)](https://freddricklogan.github.io/monte-carlo-simulator/)
 
-<p align="center">
-  <a href="https://freddricklogan.github.io/monte-carlo-simulator/"><img src="https://img.shields.io/badge/Live_Demo-Open_App-6c5ce7?style=for-the-badge&logo=github" alt="Live Demo"></a>
-</p>
+## 1. Executive Summary & Business Impact
 
-<p align="center">
-  <img src="https://img.shields.io/badge/JavaScript-Vanilla_ES6-f7df1e?logo=javascript&logoColor=black" alt="JavaScript">
-  <img src="https://img.shields.io/badge/Charts-Chart.js-ff6384?logo=chartdotjs&logoColor=white" alt="Chart.js">
-  <img src="https://img.shields.io/badge/Compute-Web_Workers-00b894" alt="Web Workers">
-  <img src="https://img.shields.io/badge/License-MIT-lightgrey" alt="License">
-</p>
+**Problem statement.** Monte Carlo is the method every quant course teaches
+and every browser demo gets slightly wrong: an estimate with no benchmark,
+a confidence interval computed on the wrong variable, percentiles by
+truncation, a progress bar that measures nothing. A reader cannot tell
+whether the number on the screen is right, and the previous version of this
+tool had every one of those faults (see `AUDIT.md`).
 
----
+**Solution & value delivered.** A browser lab for four classic problems —
+European option pricing, π, geometric Brownian paths, three-asset portfolio
+VaR — that runs in a real module Web Worker under a strict content-security
+policy, with a seeded pseudo-random source or a Sobol quasi-random sequence,
+antithetic variance reduction, and the closed-form answer beside each
+estimate: Black–Scholes for the option (error shown in standard-error
+units), the analytic standard error for π, the terminal moments for GBM,
+and parametric VaR for the portfolio. Thirty tests include
+statistical-tolerance tests that would fail if the estimators drifted.
 
-## Overview
+**[→ Read the full case study](docs/CASE_STUDY.md)**
 
-**Monte Carlo Simulation Engine** brings four classic stochastic-simulation problems into a single
-interactive tool that runs entirely in the browser. Monte Carlo methods use repeated random
-sampling to approximate quantities that are hard — or impossible — to solve in closed form, and this
-app makes that intuition tangible: adjust the parameters, run tens of thousands of trials, and watch
-the estimates converge in real time.
+| Outcome | How this repo delivers it |
+| --- | --- |
+| Every estimate is checkable | Black–Scholes (Hart's Φ), π's standard error, GBM moments and parametric VaR printed beside the Monte Carlo figure |
+| Variance reduction you can see | Antithetic pairing and a Sobol sequence (Joe–Kuo, six dimensions) selectable per run; the SE-units figure shows the gain |
+| Honest statistics | Standard errors from the discounted payoffs; interpolated percentiles; positive-loss VaR and expected shortfall; Cholesky that refuses impossible correlations |
+| Runs under a strict CSP | Real module worker, pinned Chart.js with SRI and a vendored fallback, no inline script or style |
+| Reproducible | Seeded Mulberry32 and deterministic Sobol; the same inputs give the same figures |
 
-Heavy simulation runs are offloaded to **Web Workers** so the interface stays responsive even under
-large trial counts, and results are visualized live with Chart.js.
+## 2. Demonstrated Competencies & Technical Skills
 
-> **▶ [Launch the live demo](https://freddricklogan.github.io/monte-carlo-simulator/)**
+- **Data Science & AI** — pseudo- and quasi-random sampling, inverse-normal
+  transform (Acklam with a Halley step), Box–Muller, antithetic variates,
+  Cholesky-correlated draws, VaR and expected shortfall, statistical
+  tolerance testing against closed forms.
+- **Systems Architecture & CS** — pure ES modules with a DOM layer kept
+  separate, a module Web Worker with a promise-based request map, Chart.js
+  behind a loader that degrades gracefully.
+- **Cybersecurity & Compliance** — `default-src 'none'`, `worker-src
+  'self'`, SRI computed against the artifact, CodeQL and Trivy in CI,
+  advisory link check.
+- **EdTech & Human-Centered Design** — the tour walks from a pseudo-random
+  estimate to the Sobol rerun so the reader sees the error fall; every
+  method statement is on the page.
 
----
+## 3. System Architecture & Data Flow
 
-## What it simulates
+```mermaid
+flowchart LR
+  subgraph TB1["Trust Boundary: the browser (GitHub Pages, static)"]
+    UI["index.html + src/ui.js<br/>forms · tabs · aria-live results"]:::client
+    MAIN["src/main.js<br/>Executive Shell · KPIs · tour"]:::client
+    WK["src/worker.js<br/>module Web Worker"]:::service
+    subgraph PURE["Pure modules (tested)"]
+      RNG["rng.js<br/>Mulberry32 · Sobol · Φ, Φ⁻¹"]:::service
+      OPT["options.js<br/>GBM terminal · Black–Scholes"]:::service
+      PI["pi.js"]:::service
+      BM["brownian.js<br/>paths · closed-form moments"]:::service
+      VAR["var.js<br/>Cholesky · VaR · ES · parametric"]:::service
+      ST["stats.js<br/>moments · percentiles · histogram"]:::service
+    end
+    VIZ["src/charts.js"]:::client
+  end
+  subgraph TB2["Trust Boundary: public CDN"]
+    CDN["cdn.jsdelivr.net chart.js@3.9.1"]:::security
+    VEND["vendor/chart.min.js fallback"]:::security
+  end
+  UI --> MAIN -->|"postMessage {type, params, sampler}"| WK
+  WK --> RNG & OPT & PI & BM & VAR
+  OPT & BM & VAR --> ST
+  WK -->|"result"| MAIN --> VIZ
+  CDN -.->|"SRI sha384 · CSP allow-list"| VIZ
+  VEND -.-> VIZ
+  classDef client fill:#1f2a44,stroke:#58A6FF,color:#e6edf3
+  classDef service fill:#14213d,stroke:#3fb950,color:#e6edf3
+  classDef security fill:#3a1f1f,stroke:#f85149,color:#e6edf3
+```
 
-| Module | What it does | Method |
-|:--|:--|:--|
-| **Options Pricing** | Prices European call/put options via simulated price paths and compares against the analytical benchmark | Geometric Brownian Motion + risk-neutral valuation |
-| **Portfolio VaR** | Estimates Value at Risk and expected shortfall from a distribution of simulated returns | Monte Carlo return sampling |
-| **Brownian Motion** | Animates random-walk price paths to build intuition for diffusion processes | Wiener process |
-| **π Estimation** | Approximates π by sampling points in a unit square and measuring the fraction inside the circle | Geometric probability |
+No network calls leave the page beyond the pinned chart library. No backend, no account, no telemetry.
 
----
+## 4. Technical Highlights & Engineering Decisions
 
-## Why this project
+### ADR-1 — Put the closed form beside the estimate, and test the distance
 
-| Skill demonstrated | Where it shows up |
-|:--|:--|
-| **Quantitative / financial modeling** | Black–Scholes benchmark, risk-neutral option pricing, Value at Risk |
-| **Numerical methods** | Monte Carlo estimation, convergence behavior, variance as a function of trial count |
-| **Performance engineering** | Web Workers keep heavy simulation off the main thread for a responsive UI |
-| **Data visualization** | Live-updating Chart.js plots of paths, distributions, and convergence |
-| **Zero-dependency delivery** | Runs as a static page — no backend, no build step |
+**Context.** The previous build printed a Monte Carlo call price with no
+benchmark and a "95% CI" built from the standard deviation of the stock
+prices rather than the payoffs (`AUDIT.md` A1–A2).
 
----
+**Decision.** `blackScholes()` uses Hart's double-precision Φ; the page
+shows the absolute error in units of the payoff standard error, and
+`tests/options.test.js` requires the seeded estimate to fall within three
+standard errors of Black–Scholes.
 
-## Tech stack
+**Consequence.** A wrong estimator fails CI rather than looking plausible.
+The same pattern covers π (analytic SE), GBM (closed-form moments) and VaR
+(parametric benchmark within 3%).
 
-- **Language:** Vanilla JavaScript (ES6+)
-- **Compute:** Web Workers for non-blocking simulation
-- **Charting:** Chart.js
-- **Runtime:** 100% client-side — no backend, no install
+### ADR-2 — Sobol for options, π and VaR; never for stepped paths
 
----
+**Context.** A quasi-random sequence needs one dimension per random input.
+An option price and π need one and two; the VaR needs three; a 250-step
+path needs 250.
 
-## Run locally
+**Decision.** `sobol()` implements six dimensions from Joe–Kuo direction
+numbers and the worker forces the seeded pseudo-random source for paths.
+`tests/brownian.test.js` documents why: feeding successive 1-D Sobol points
+to the steps collapses the terminal standard deviation to under half the
+closed form.
+
+**Consequence.** Users get the variance-reduction gain where it is valid and
+a stated reason where it is not, instead of a silently wrong distribution.
+
+### ADR-3 — A real worker file, because a Blob worker cannot pass a strict CSP
+
+**Context.** The original built its worker from a template string and a
+`blob:` URL, which `script-src 'self'` forbids.
+
+**Decision.** `src/worker.js` is a module worker loaded by URL; the page
+adds `worker-src 'self'`; requests are matched to promises by id so
+concurrent tabs cannot receive each other's results.
+
+**Consequence.** The demo runs under the portfolio's standard policy, and
+the previous bug where every tab overwrote `worker.onmessage` is gone.
+
+## 5. Getting Started & Verification
+
+**Prerequisites.** Node 22 LTS. No build step; the page is served from the
+repository root.
 
 ```bash
 git clone https://github.com/Freddricklogan/monte-carlo-simulator.git
 cd monte-carlo-simulator
-
-# open directly, or serve it (recommended so Web Workers load correctly)
-python3 -m http.server 8000
-# then visit http://localhost:8000
+npm ci
+npm run lint && npm run validate && npm run coverage
+npx serve .    # open http://localhost:3000
 ```
 
-> Tip: serving over `http://` rather than opening the file directly ensures the Web Workers load
-> without browser security restrictions.
+**Verification — the numbers this repository actually produced:**
 
----
+```bash
+npm run coverage   # 30 passed / 30; All files 99.14% stmts, 94.01% branches
+npm run lint       # 0 problems
+npm run validate   # html-validate index.html: clean
+```
 
-## Author
+| Check | Result |
+| --- | --- |
+| Unit tests (Vitest) | **30 passed / 30** across 6 files, including statistical-tolerance tests (3 SE) and Sobol's published first points |
+| Coverage (pure modules) | **99.14%** statements, **94.01%** branches (`main.js`, `ui.js`, `worker.js`, `charts.js` covered by the browser smoke test) |
+| ESLint, html-validate | clean |
+| Black–Scholes benchmark (S 100, K 105, σ 0.2, r 0.05, T 1) | call 8.0214, put 7.9004; put–call parity to 1e-9 |
+| Headless Chrome smoke | **0 console errors**; pseudo-random call $7.87 vs $8.02 (1.60 SE) → Sobol $8.02 (0.04 SE); antithetic 0.06 SE; π 3.13920 (error 0.00239 < SE 0.01161); GBM std 0.1665 vs closed form 0.1667; VaR 95% $134,475 vs parametric $135,188; five tour steps; no horizontal scroll at 1280 or 400 px |
 
-**Freddrick Logan** — Educational Technologist & Technology Leader
-[GitHub](https://github.com/Freddricklogan) · [LinkedIn](https://www.linkedin.com/in/freddricklogan/)
+## 6. Live Demo & Production Showcase
 
-## License
+**<https://freddricklogan.github.io/monte-carlo-simulator/>**
 
-Released under the [MIT License](LICENSE).
+**30-second guided walkthrough.** Press **Take the 30-second tour**.
+
+1. **Price an option against the benchmark** — 20,000 terminal prices; the
+   error in SE units beside Black–Scholes.
+2. **Switch to Sobol and rerun** — same paths, the error falls.
+3. **Estimate π** — points in the circle, with the pseudo-random SE.
+4. **Generate paths** — 200 GBM paths and the closed-form moments.
+5. **Portfolio VaR two ways** — Monte Carlo and parametric, side by side.
+
+Every figure is reproducible: same seed, same inputs, same numbers.

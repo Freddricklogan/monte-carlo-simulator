@@ -242,6 +242,7 @@ async function boot() {
   drawPi([]);
 
   shell = mountExecShell({
+  theme: 'signal',
     title: 'Monte Carlo Simulation Engine',
     tagline: 'Four classic stochastic problems — option pricing, π, Brownian paths, portfolio VaR — with a seeded pseudo-random or Sobol quasi-random source, antithetic variance reduction, and the closed-form benchmark beside every estimate.',
     repo: 'https://github.com/Freddricklogan/monte-carlo-simulator',

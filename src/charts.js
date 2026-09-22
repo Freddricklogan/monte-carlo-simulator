@@ -1,10 +1,11 @@
+import { tokens } from './exec-shell.js';
 /** Chart.js wiring. Every function here touches the DOM; none of them compute. */
 const GRID = 'rgba(34,48,77,.6)';
-const TICK = '#8b98b0';
-const ACCENT = '#58A6FF';
-const OK = '#3fb950';
-const WARN = '#d29922';
-const DANGER = '#f85149';
+const TICK = tokens().muted;
+const ACCENT = tokens().accent;
+const OK = tokens().ok;
+const WARN = tokens().warn;
+const DANGER = tokens().danger;
 
 /** Chart.js arrives from a CDN under SRI; if blocked, fall back to the vendored copy; else degrade to numbers only. */
 export async function loadChartLib() {
